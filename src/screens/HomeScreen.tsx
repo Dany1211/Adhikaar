@@ -83,7 +83,24 @@ const HomeScreen = () => {
 
     const renderHeader = () => (
         <View style={styles.headerContainer}>
-
+            {/* Top Bar: Avatar & Greeting */}
+            <View style={styles.topBar}>
+                <View style={styles.userInfo}>
+                    <Image
+                        source={require('../assets/applogo.png')}
+                        style={styles.avatar}
+                        resizeMode="cover"
+                    />
+                    <View>
+                        <Text style={styles.greetingText}>Good Morning 👋</Text>
+                        <Text style={styles.userName}>Citizen</Text>
+                    </View>
+                </View>
+                <TouchableOpacity style={styles.notificationBtn}>
+                    <MaterialCommunityIcons name="bell-outline" size={24} color={COLORS.text} />
+                    <View style={styles.notificationDot} />
+                </TouchableOpacity>
+            </View>
 
             {/* Search Bar */}
             <View style={styles.searchContainer}>
@@ -95,43 +112,58 @@ const HomeScreen = () => {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
-                {searchQuery.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                        <MaterialCommunityIcons name="close-circle" size={20} color={COLORS.secondary} />
+            </View>
+
+            {/* Bento Grid */}
+            <View style={styles.bentoGrid}>
+                {/* Row 1 */}
+                <View style={styles.bentoRow}>
+                    <TouchableOpacity
+                        style={[styles.bentoCard, { backgroundColor: COLORS.bento.yellow }]}
+                        onPress={() => Alert.alert('Coming Soon', 'Eligibility feature.')}
+                    >
+                        <View style={styles.bentoIconContainer}>
+                            <MaterialCommunityIcons name="clipboard-check" size={28} color={COLORS.black} />
+                        </View>
+                        <Text style={[styles.bentoText, { color: COLORS.black }]}>{t('checkEligibility')}</Text>
                     </TouchableOpacity>
-                )}
-            </View>
 
-            {/* Greeting (Optional, kept smaller) */}
-            <View style={styles.greetingSection}>
-                <Text style={styles.greetingTitle}>{t('findSchemesTitle')}</Text>
-            </View>
-
-            {/* Categories */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>{t('browseCategory')}</Text>
-                    {selectedCategoryId && (
-                        <TouchableOpacity onPress={() => setSelectedCategoryId(null)}>
-                            <Text style={styles.clearFilter}>{t('clear')}</Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity
+                        style={[styles.bentoCard, { backgroundColor: COLORS.bento.blue }]}
+                        onPress={() => navigation.navigate('MyApplications')}
+                    >
+                        <View style={styles.bentoIconContainer}>
+                            <MaterialCommunityIcons name="folder-text" size={28} color={COLORS.white} />
+                        </View>
+                        <Text style={[styles.bentoText, { color: COLORS.white }]}>{t('myApplications')}</Text>
+                    </TouchableOpacity>
                 </View>
 
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.categoriesList}
-                >
-                    {categories.map((category) => (
-                        <CategoryPill
-                            key={category.id}
-                            label={category.label}
-                            isActive={selectedCategoryId === category.id}
-                            onPress={() => handleCategoryPress(category)}
-                        />
-                    ))}
-                </ScrollView>
+                {/* Row 2 */}
+                <View style={styles.bentoRow}>
+                    <TouchableOpacity
+                        style={[styles.bentoCard, { backgroundColor: COLORS.bento.green }]}
+                        onPress={() => {
+                            // Scroll to categories or just show them
+                            Alert.alert('Info', 'Scroll down to see full categories list.')
+                        }}
+                    >
+                        <View style={styles.bentoIconContainer}>
+                            <MaterialCommunityIcons name="view-grid" size={28} color={COLORS.white} />
+                        </View>
+                        <Text style={[styles.bentoText, { color: COLORS.white }]}>{t('browseCategory')}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.bentoCard, { backgroundColor: COLORS.bento.orange }]}
+                        onPress={() => Alert.alert('Saved', 'View your saved schemes here.')}
+                    >
+                        <View style={styles.bentoIconContainer}>
+                            <MaterialCommunityIcons name="bookmark" size={28} color={COLORS.white} />
+                        </View>
+                        <Text style={[styles.bentoText, { color: COLORS.white }]}>{t('helpSaved')}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Featured Schemes Header */}
@@ -189,71 +221,127 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContent: {
-        paddingBottom: SPACING.l,
+        paddingBottom: SPACING.xxl,
     },
     headerContainer: {
-        paddingBottom: SPACING.s,
+        paddingBottom: SPACING.l,
     },
+    // Top Bar
+    topBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.l,
+        marginTop: SPACING.m,
+        marginBottom: SPACING.s,
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    avatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        marginRight: SPACING.m,
+        backgroundColor: COLORS.primaryLight,
+    },
+    greetingText: {
+        fontSize: FONT_SIZE.s,
+        color: COLORS.textLight,
+        fontWeight: '500',
+    },
+    userName: {
+        fontSize: FONT_SIZE.l,
+        color: COLORS.text,
+        fontWeight: '700',
+    },
+    notificationBtn: {
+        padding: SPACING.s,
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        ...SHADOWS.light,
+    },
+    notificationDot: {
+        position: 'absolute',
+        top: 10,
+        right: 12,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: COLORS.danger,
+        borderWidth: 1,
+        borderColor: COLORS.white,
+    },
+    // Search
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.surface,
+        backgroundColor: COLORS.white,
         marginHorizontal: SPACING.l,
-        paddingHorizontal: SPACING.m,
-        borderRadius: 12, // Softer radius
-        height: 50,
+        paddingHorizontal: SPACING.l,
+        borderRadius: 16,
+        height: 52,
+        marginTop: SPACING.s,
         marginBottom: SPACING.l,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        ...SHADOWS.light, // Use subtle shadow
+        ...SHADOWS.light,
     },
     searchIcon: {
-        marginRight: SPACING.s,
+        marginRight: SPACING.m,
     },
     searchInput: {
         flex: 1,
         fontSize: FONT_SIZE.m,
         color: COLORS.text,
+        fontWeight: '500',
         height: '100%',
     },
-    greetingSection: {
+    // Bento Grid
+    bentoGrid: {
         paddingHorizontal: SPACING.l,
-        marginBottom: SPACING.l,
+        gap: SPACING.m,
+        marginBottom: SPACING.xl,
     },
-    greetingTitle: {
-        fontSize: FONT_SIZE.xl,
-        fontWeight: '700',
-        color: COLORS.text,
-        lineHeight: 32,
-    },
-    section: {
-        marginBottom: SPACING.m,
-    },
-    sectionHeader: {
+    bentoRow: {
         flexDirection: 'row',
+        gap: SPACING.m,
+    },
+    bentoCard: {
+        flex: 1,
+        borderRadius: 20,
+        padding: SPACING.l,
+        height: 140, // Square-ish
         justifyContent: 'space-between',
+        ...SHADOWS.light,
+    },
+    bentoIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.2)', // Semi-transparent
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: SPACING.l,
-        marginBottom: SPACING.m,
+    },
+    bentoText: {
+        fontSize: FONT_SIZE.m,
+        fontWeight: '700',
+        marginTop: SPACING.s,
+    },
+    // Sections
+    section: {
+        marginBottom: SPACING.xl,
     },
     sectionTitle: {
+        paddingHorizontal: SPACING.l,
         fontSize: FONT_SIZE.l,
         fontWeight: '700',
         color: COLORS.text,
+        letterSpacing: -0.2,
     },
     resultsCount: {
         fontSize: FONT_SIZE.m,
         fontWeight: 'normal',
         color: COLORS.textLight,
-    },
-    clearFilter: {
-        fontSize: FONT_SIZE.s,
-        color: COLORS.primary,
-        fontWeight: '600',
-    },
-    categoriesList: {
-        paddingHorizontal: SPACING.l,
-        paddingBottom: SPACING.s,
     },
     emptyContainer: {
         alignItems: 'center',

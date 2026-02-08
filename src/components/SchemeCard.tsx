@@ -23,30 +23,37 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
         <TouchableOpacity
             style={[styles.card, style]}
             onPress={onPress}
-            activeOpacity={0.9}
+            activeOpacity={0.7}
         >
-            <View style={styles.header}>
-                <View style={[styles.tag, isCentral ? styles.tagCentral : styles.tagState]}>
-                    <Text style={[styles.tagText, isCentral ? styles.tagTextCentral : styles.tagTextState]}>
+            {/* Icon Container */}
+            <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                    name={isCentral ? "bank-outline" : "city-variant-outline"}
+                    size={28}
+                    color={COLORS.primary}
+                />
+            </View>
+
+            {/* Content */}
+            <View style={styles.contentContainer}>
+                <View style={styles.header}>
+                    <Text style={styles.govTag}>
                         {isCentral ? t('centralGov') : t('stateGov')}
                     </Text>
                 </View>
-                {/* Optional: Add save/bookmark icon here */}
+
+                <Text style={styles.title} numberOfLines={2}>
+                    {scheme.name}
+                </Text>
+
+                <Text style={styles.description} numberOfLines={1}>
+                    {scheme.short_description}
+                </Text>
             </View>
 
-            <Text style={styles.title} numberOfLines={2}>
-                {scheme.name}
-            </Text>
-
-            <Text style={styles.description} numberOfLines={3}>
-                {scheme.short_description}
-            </Text>
-
-            <View style={styles.divider} />
-
-            <View style={styles.footer}>
-                <Text style={styles.learnMore}>{t('learnMore')}</Text>
-                <MaterialCommunityIcons name="arrow-right" size={24} color={COLORS.primary} />
+            {/* Action Icon */}
+            <View style={styles.actionContainer}>
+                <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.secondary} />
             </View>
         </TouchableOpacity>
     );
@@ -54,70 +61,52 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: COLORS.surface,
-        borderRadius: 24, // Much rounder
-        marginBottom: SPACING.l, // More space between cards
-        ...SHADOWS.card,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        padding: SPACING.l,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.cardBackground,
+        borderRadius: 16,
+        marginBottom: SPACING.m,
+        padding: SPACING.m,
+        ...SHADOWS.light,
+        marginHorizontal: SPACING.l,
+    },
+    iconContainer: {
+        width: 56,
+        height: 56,
+        borderRadius: 12,
+        backgroundColor: COLORS.primaryLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: SPACING.m,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'center',
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: SPACING.m,
+        marginBottom: 4,
     },
-    tag: {
-        paddingHorizontal: SPACING.s,
-        paddingVertical: 6,
-        borderRadius: 8,
-        backgroundColor: COLORS.background,
-    },
-    tagCentral: {
-        backgroundColor: COLORS.primaryLight,
-    },
-    tagState: {
-        backgroundColor: '#FFF0F0', // Very light red
-    },
-    tagText: {
+    govTag: {
         fontSize: FONT_SIZE.xs,
-        fontWeight: 'bold',
+        fontWeight: '700',
+        color: COLORS.primary,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
-    tagTextCentral: {
-        color: COLORS.primary,
-    },
-    tagTextState: {
-        color: COLORS.danger,
-    },
     title: {
-        fontSize: FONT_SIZE.xl, // Larger title
-        fontWeight: '800', // Bolder
-        color: COLORS.text,
-        marginBottom: SPACING.s,
-        lineHeight: 30,
-    },
-    description: {
-        fontSize: FONT_SIZE.m,
-        color: COLORS.textLight,
-        lineHeight: 24,
-        marginBottom: SPACING.l,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: COLORS.border,
-        marginBottom: SPACING.m,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    learnMore: {
         fontSize: FONT_SIZE.m,
         fontWeight: '700',
-        color: COLORS.primary,
+        color: COLORS.text,
+        marginBottom: 2,
+        lineHeight: 20,
+    },
+    description: {
+        fontSize: FONT_SIZE.s,
+        color: COLORS.textLight,
+    },
+    actionContainer: {
+        marginLeft: SPACING.s,
     },
 });
 

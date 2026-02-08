@@ -1,61 +1,72 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
-import { COLORS, SPACING, FONT_SIZE } from '../constants/theme';
+import { COLORS, SPACING, FONT_SIZE, SHADOWS } from '../constants/theme';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageCode } from '../constants/translations';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 const WelcomeScreen = ({ navigation }: Props) => {
     const { t, language, setLanguage } = useLanguage();
 
-    const languages: { code: LanguageCode; label: string }[] = [
-        { code: 'en', label: 'English' },
-        { code: 'hi', label: 'हिंदी' },
-        { code: 'mr', label: 'मराठी' },
+    const languages: { code: LanguageCode; label: string; subLabel: string }[] = [
+        { code: 'en', label: 'English', subLabel: 'Default' },
+        { code: 'hi', label: 'हिंदी', subLabel: 'Hindi' },
+        { code: 'mr', label: 'मराठी', subLabel: 'Marathi' },
     ];
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.languageContainer}>
-                    {languages.map((lang) => (
-                        <Pressable
-                            key={lang.code}
-                            style={[
-                                styles.languageButton,
-                                language === lang.code && styles.languageButtonActive,
-                            ]}
-                            onPress={() => setLanguage(lang.code)}
-                        >
-                            <Text
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            <View style={styles.contentContainer}>
+                {/* Header / Logo Section */}
+                <View style={styles.headerSection}>
+                    <View style={styles.logoContainer}>
+                        <Image
+                            source={require('../assets/applogo.png')}
+                            style={styles.logo}
+                            resizeMode="contain"
+                        />
+                    </View>
+                    <Text style={styles.title}>Adhikaar</Text>
+                    <Text style={styles.subtitle}>{t('subtitle') || 'Empowering Citizens'}</Text>
+                </View>
+
+                {/* Language Selection */}
+                <View style={styles.languageSection}>
+                    <Text style={styles.sectionTitle}>Select Language / भाषा चुनें</Text>
+                    <View style={styles.languageGrid}>
+                        {languages.map((lang) => (
+                            <Pressable
+                                key={lang.code}
                                 style={[
-                                    styles.languageText,
-                                    language === lang.code && styles.languageTextActive,
+                                    styles.langCard,
+                                    language === lang.code && styles.langCardActive
                                 ]}
+                                onPress={() => setLanguage(lang.code)}
                             >
-                                {lang.label}
-                            </Text>
-                        </Pressable>
-                    ))}
+                                <Text style={[
+                                    styles.langLabel,
+                                    language === lang.code && styles.langLabelActive
+                                ]}>
+                                    {lang.label}
+                                </Text>
+                                <Text style={[
+                                    styles.langSubLabel,
+                                    language === lang.code && styles.langLabelActive
+                                ]}>
+                                    {lang.subLabel}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
                 </View>
             </View>
 
-            {/* Top content */}
-            <View style={styles.content}>
-                <Text style={styles.title}>Government Schemes{'\n'}Made Easy</Text>
-                <Text style={styles.subtitle}>Find benefits tailored for you in seconds.</Text>
-
-                <View style={styles.divider} />
-
-                <Text style={styles.description}>
-                    One-stop access to subsidies, scholarships, and pensions. No more paperwork confusion.
-                </Text>
-            </View>
-
-            {/* CTA */}
+            {/* Footer CTA */}
             <View style={styles.footer}>
                 <Pressable
                     style={({ pressed }) => [
@@ -65,13 +76,10 @@ const WelcomeScreen = ({ navigation }: Props) => {
                     onPress={() => navigation.navigate('Home')}
                 >
                     <Text style={styles.buttonText}>{t('getStarted')}</Text>
+                    <MaterialCommunityIcons name="arrow-right" size={24} color={COLORS.white} />
                 </Pressable>
-
-                <Text style={styles.footerText}>
-                    100% Free & Secure • Government Data
-                </Text>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -79,98 +87,111 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        padding: SPACING.l,
-        justifyContent: 'space-between',
     },
-    header: {
-        marginTop: SPACING.xxl,
-        alignItems: 'center',
-    },
-    languageContainer: {
-        flexDirection: 'row',
-        backgroundColor: COLORS.surface,
-        borderRadius: 30,
-        padding: 4,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-    },
-    languageButton: {
-        paddingVertical: 10,
-        paddingHorizontal: SPACING.l,
-        borderRadius: 26,
-    },
-    languageButtonActive: {
-        backgroundColor: COLORS.primaryLight,
-    },
-    languageText: {
-        color: COLORS.text,
-        fontSize: FONT_SIZE.m,
-        fontWeight: '600',
-    },
-    languageTextActive: {
-        color: COLORS.primary,
-        fontWeight: '700',
-    },
-    content: {
+    contentContainer: {
         flex: 1,
+        padding: SPACING.l,
         justifyContent: 'center',
     },
+    headerSection: {
+        alignItems: 'center',
+        marginBottom: SPACING.xxl,
+    },
+    logoContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 24,
+        backgroundColor: COLORS.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.l,
+        ...SHADOWS.light,
+    },
+    logo: {
+        width: 60,
+        height: 60,
+    },
     title: {
-        fontSize: FONT_SIZE.xxxl, // Hero size
+        fontSize: 32,
         fontWeight: '900',
         color: COLORS.text,
-        marginBottom: SPACING.m,
-        lineHeight: 44,
-        letterSpacing: -0.5,
+        marginBottom: SPACING.xs,
+        letterSpacing: -1,
     },
     subtitle: {
-        fontSize: FONT_SIZE.xl,
-        color: COLORS.textLight,
-        marginBottom: SPACING.l,
-        lineHeight: 32,
-    },
-    divider: {
-        width: 60,
-        height: 6,
-        backgroundColor: COLORS.primary,
-        borderRadius: 3,
-        marginBottom: SPACING.l,
-    },
-    description: {
         fontSize: FONT_SIZE.l,
-        color: COLORS.secondary,
-        lineHeight: 28,
-        maxWidth: 320,
+        color: COLORS.textLight,
+        fontWeight: '500',
+    },
+    languageSection: {
+        width: '100%',
+    },
+    sectionTitle: {
+        fontSize: FONT_SIZE.m,
+        color: COLORS.textLight,
+        fontWeight: '600',
+        marginBottom: SPACING.m,
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    languageGrid: {
+        gap: SPACING.m,
+    },
+    langCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: COLORS.white,
+        padding: SPACING.l,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: 'transparent',
+        ...SHADOWS.light,
+    },
+    langCardActive: {
+        borderColor: COLORS.primary,
+        backgroundColor: '#F0F9FF', // Very light blue
+    },
+    langLabel: {
+        fontSize: FONT_SIZE.l,
+        fontWeight: '700',
+        color: COLORS.text,
+    },
+    langSubLabel: {
+        fontSize: FONT_SIZE.s,
+        color: COLORS.textLight,
+        fontWeight: '500',
+    },
+    langLabelActive: {
+        color: COLORS.primary,
+    },
+    checkIcon: {
+        position: 'absolute',
+        right: SPACING.l,
     },
     footer: {
-        marginBottom: SPACING.l,
+        padding: SPACING.l,
+        paddingBottom: SPACING.xl,
     },
     button: {
         backgroundColor: COLORS.primary,
-        paddingVertical: 20, // Taller button
-        borderRadius: 16,
+        paddingVertical: 18,
+        borderRadius: 20,
+        flexDirection: 'row',
         alignItems: 'center',
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 6,
-        marginBottom: SPACING.m,
+        justifyContent: 'center',
+        gap: SPACING.s,
+        ...SHADOWS.medium,
     },
     buttonPressed: {
         opacity: 0.9,
         transform: [{ scale: 0.98 }],
     },
     buttonText: {
-        color: '#fff',
-        fontSize: FONT_SIZE.xl,
+        color: COLORS.white,
+        fontSize: FONT_SIZE.l,
         fontWeight: '700',
-    },
-    footerText: {
-        textAlign: 'center',
-        fontSize: FONT_SIZE.s,
-        color: COLORS.textLight,
-        fontWeight: '500',
     },
 });
 

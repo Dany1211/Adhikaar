@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS, SPACING, FONT_SIZE } from '../constants/theme';
+import { COLORS, SPACING, FONT_SIZE, SHADOWS } from '../constants/theme';
 
 interface CategoryPillProps {
     label: string;
@@ -56,28 +56,23 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.l, // More padding
-        paddingVertical: 14, // Taller touch target
-        borderRadius: 16,
-        backgroundColor: COLORS.surface,
-        marginRight: SPACING.m,
-        // Removed border for cleaner look
-        // Optional shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        paddingHorizontal: SPACING.l,
+        paddingVertical: 12,
+        borderRadius: 24,
+        backgroundColor: COLORS.white,
+        marginRight: SPACING.s,
+        // No border, just shadow
+        ...SHADOWS.light,
     },
     activeContainer: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
+        backgroundColor: COLORS.primary, // Solid primary for active
+        ...SHADOWS.medium,
     },
     icon: {
         marginRight: SPACING.s,
     },
     text: {
-        fontSize: FONT_SIZE.m, // Larger text
+        fontSize: FONT_SIZE.m,
         color: COLORS.text,
         fontWeight: '600',
     },
