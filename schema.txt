@@ -1,0 +1,180 @@
+PROJECT: ADHIKAAR
+PURPOSE: Canonical data schemas for offline-first + Supabase-backed app
+NOTE:
+- All schemas are language-agnostic
+- English is the canonical language for stored text
+- Translations happen at UI / AI layer
+- AI NEVER writes raw text into these schemas
+--------------------------------------------------
+
+
+==============================
+SCHEMA: schemes
+==============================
+Purpose:
+- Master list of government schemes
+- Read-only for users
+- Source of truth for discovery & eligibility
+
+Fields:
+- id (uuid, primary key)
+- name (text)                       // canonical English name
+- short_description (text)
+- long_description (text)
+- state_type (enum)                 // 'central' | 'state'
+- applicable_states (text[])        // NULL = all states
+- categories (text[])               // e.g. ['farmer','women']
+- benefits (text)
+- official_link (text)
+- is_active (boolean)
+- last_updated (date)
+- created_at (timestamp)
+
+Offline notes:
+- Cached locally for offline browsing
+- Updated when network is available
+
+
+==============================
+SCHEMA: scheme_eligibility_rules
+==============================
+Purpose:
+- Deterministic eligibility rules
+- AI does NOT decide eligibility
+- App evaluates rules locally
+
+Fields:
+- id (uuid, primary key)
+- scheme_id (uuid, FK -> schemes.id)
+- min_age (int, nullable)
+- max_age (int, nullable)
+- income_max (numeric, nullable)
+- occupation (text[])               // ['farmer','student']
+- category (text[])                 // ['sc','st','obc','general']
+- requires_land_ownership (boolean)
+- requires_disability (boolean)
+- created_at (timestamp)
+
+Offline notes:
+- Rules are downloaded with schemes
+- Evaluated fully offline
+
+
+==============================
+SCHEMA: users
+==============================
+Purpose:
+- Soft identity (optional)
+- No authentication required initially
+
+Fields:
+- id (uuid, primary key)
+- phone (text, unique, nullable)
+- name (text, nullable)
+- created_at (timestamp)
+
+Offline notes:
+- Local UUID used until auth is added
+- Phone may be added later for sync
+
+
+==============================
+SCHEMA: user_profiles
+==============================
+Purpose:
+- Structured eligibility data
+- Filled via conversational UI / AI
+- NEVER via visible forms
+
+Fields:
+- id (uuid, primary key)
+- user_id (uuid, FK -> users.id)
+- age (int, nullable)
+- state (text, nullable)
+- income (numeric, nullable)
+- occupation (text, nullable)
+- category (text, nullable)
+- has_disability (boolean, nullable)
+- owns_land (boolean, nullable)
+- updated_at (timestamp)
+
+Offline notes:
+- Stored locally first
+- Synced later if auth exists
+
+
+==============================
+SCHEMA: applications
+==============================
+Purpose:
+- Track schemes user is interested in / applied for
+- Core retention feature
+
+Fields:
+- id (uuid, primary key)
+- user_id (uuid, FK -> users.id)
+- scheme_id (uuid, FK -> schemes.id)
+- status (enum)                     // 'saved' | 'applied' | 'pending' | 'approved' | 'rejected'
+- applied_on (date, nullable)
+- notes (text, nullable)
+- created_at (timestamp)
+
+Offline notes:
+- Fully usable offline
+- Sync status later if needed
+
+
+==============================
+SCHEMA: scheme_categories
+==============================
+Purpose:
+- Canonical category registry
+- Prevents hardcoded strings everywhere
+
+Fields:
+- id (text, primary key)             // 'farmer','student'
+- label (text)                       // 'Farmers'
+- created_at (timestamp)
+
+Offline notes:
+- Small table
+- Cached permanently
+
+
+==============================
+OFFLINE-FIRST RULES
+==============================
+1. App must work fully without network
+2. Supabase is a sync target, not a dependency
+3. All reads must have a local fallback
+4. AI operates ONLY on:
+   - user input
+   - schema definitions
+5. AI NEVER mutates authoritative data
+6. Eligibility is deterministic, explainable, auditable
+
+
+==============================
+LANGUAGE RULES
+==============================
+- DB stores canonical English
+- UI language is user-selected
+- AI translates at presentation layer
+- Structured fields are language-neutral
+
+
+==============================
+AI ROLE (STRICT)
+==============================
+AI is allowed to:
+- extract structured fields from free text
+- explain eligibility decisions
+- translate scheme descriptions for display
+
+AI is NOT allowed to:
+- decide eligibility
+- modify scheme data
+- invent schemes
+- bypass rules
+--------------------------------------------------
+END OF FILE

@@ -1,19 +1,23 @@
 export const COLORS = {
-    primary: '#0056b3', // Strong blue for primary actions
-    secondary: '#6c757d', // Grey for secondary actions
-    background: '#f8f9fa', // Light background
-    text: '#212529', // Dark text for readability
-    textLight: '#6c757d', // Light text
-    success: '#28a745', // Green for success
-    warning: '#ffc107', // Yellow for warnings
-    danger: '#dc3545', // Red for errors/danger
+    primary: '#1a73e8', // Government blue, trustworthy
+    primaryLight: '#e8f0fe', // Light blue background for chips/accents
+    secondary: '#5f6368', // Neutral text
+    background: '#f8f9fa', // Light gray background
+    surface: '#ffffff', // Cards, headers
+    text: '#202124', // High contrast text
+    textLight: '#5f6368', // Secondary text
+    border: '#dadce0', // Subtle borders
+    success: '#1e8e3e',
+    warning: '#f9ab00',
+    danger: '#d93025',
     white: '#ffffff',
-    border: '#dee2e6',
+    black: '#000000',
 };
 
 export const SPACING = {
-    xs: 4,
-    s: 8,
+    xxs: 4,
+    xs: 8,
+    s: 12,
     m: 16,
     l: 24,
     xl: 32,
@@ -21,9 +25,28 @@ export const SPACING = {
 };
 
 export const FONT_SIZE = {
+    xs: 12,
     s: 14,
     m: 16,
-    l: 20,
-    xl: 24,
-    xxl: 32,
+    l: 18,
+    xl: 20,
+    xxl: 24,
+    xxxl: 32,
+};
+
+export const SHADOWS = {
+    light: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    medium: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 4,
+    },
 };
