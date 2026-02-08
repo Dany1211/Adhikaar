@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZE } from '../constants/theme';
 
@@ -15,7 +15,7 @@ const getIconName = (label: string): string => {
     if (l.includes('farm')) return 'tractor';
     if (l.includes('student')) return 'school';
     if (l.includes('women') || l.includes('female')) return 'human-female';
-    if (l.includes('senior') || l.includes('elder')) return 'human-cane'; // or 'cane' if available, otherwise 'human-male-height-variant'
+    if (l.includes('senior') || l.includes('elder')) return 'human-cane';
     if (l.includes('work') || l.includes('labour')) return 'hard-hat';
     if (l.includes('business') || l.includes('entrepreneur')) return 'briefcase';
     if (l.includes('health')) return 'hospital-box';
@@ -41,8 +41,8 @@ const CategoryPill: React.FC<CategoryPillProps> = ({
         >
             <MaterialCommunityIcons
                 name={getIconName(label)}
-                size={18}
-                color={isActive ? COLORS.primary : COLORS.secondary}
+                size={24} // Larger icon
+                color={isActive ? COLORS.white : COLORS.primary}
                 style={styles.icon}
             />
             <Text style={[styles.text, isActive && styles.activeText]}>
@@ -56,29 +56,34 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.s, // reduced padding for chip look
-        paddingVertical: SPACING.xs,
-        borderRadius: 8, // slightly squarer, Material chip style
-        backgroundColor: COLORS.background, // lighter, integrated background
-        marginRight: SPACING.s,
-        borderWidth: 1,
-        borderColor: COLORS.border,
+        paddingHorizontal: SPACING.l, // More padding
+        paddingVertical: 14, // Taller touch target
+        borderRadius: 16,
+        backgroundColor: COLORS.surface,
+        marginRight: SPACING.m,
+        // Removed border for cleaner look
+        // Optional shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     activeContainer: {
-        backgroundColor: COLORS.primaryLight,
-        borderColor: COLORS.primaryLight,
+        backgroundColor: COLORS.primary,
+        borderColor: COLORS.primary,
     },
     icon: {
-        marginRight: SPACING.xs,
+        marginRight: SPACING.s,
     },
     text: {
-        fontSize: FONT_SIZE.s,
+        fontSize: FONT_SIZE.m, // Larger text
         color: COLORS.text,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     activeText: {
-        color: COLORS.primary, // Using primary color text on light background
-        fontWeight: '600',
+        color: COLORS.white,
+        fontWeight: '700',
     },
 });
 

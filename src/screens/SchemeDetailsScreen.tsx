@@ -6,8 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
-    Linking,
-    Alert,
+    Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -55,9 +54,11 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
     const renderSection = (title: string, icon: string, content: string | undefined) => {
         if (!content) return null;
         return (
-            <View style={styles.section}>
+            <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
-                    <MaterialCommunityIcons name={icon} size={20} color={COLORS.primary} style={styles.sectionIcon} />
+                    <View style={styles.iconContainer}>
+                        <MaterialCommunityIcons name={icon} size={24} color={COLORS.primary} />
+                    </View>
                     <Text style={styles.sectionTitle}>{title}</Text>
                 </View>
                 <Text style={styles.sectionContent}>{content}</Text>
@@ -69,8 +70,16 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
         <SafeAreaView style={styles.container} edges={['bottom']}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
+                {/* Navbar/Back */}
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.text} />
+                </TouchableOpacity>
+
                 {/* Header Card */}
-                <View style={styles.headerCard}>
+                <View style={styles.titleBlock}>
                     <View style={styles.tagContainer}>
                         <View style={[styles.tag, isCentral ? styles.tagCentral : styles.tagState]}>
                             <Text style={[styles.tagText, isCentral ? styles.tagTextCentral : styles.tagTextState]}>
@@ -82,13 +91,14 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
                     <Text style={styles.shortDescription}>{scheme.short_description}</Text>
                 </View>
 
-                {/* Structured Sections */}
+                {/* Content Cards */}
                 {renderSection('Key Benefits', 'gift-outline', scheme.benefits)}
 
-                {/* Placeholder logic for 'Who Can Apply' based on categories if rule description missing */}
-                <View style={styles.section}>
+                <View style={styles.sectionCard}>
                     <View style={styles.sectionHeader}>
-                        <MaterialCommunityIcons name="account-group-outline" size={20} color={COLORS.primary} style={styles.sectionIcon} />
+                        <View style={styles.iconContainer}>
+                            <MaterialCommunityIcons name="account-group-outline" size={24} color={COLORS.primary} />
+                        </View>
                         <Text style={styles.sectionTitle}>Who Can Apply</Text>
                     </View>
                     <View style={styles.chipContainer}>
@@ -103,10 +113,11 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
                     </Text>
                 </View>
 
-                {/* Documents - Static for now as per schema limitations */}
-                <View style={styles.section}>
+                <View style={styles.sectionCard}>
                     <View style={styles.sectionHeader}>
-                        <MaterialCommunityIcons name="file-document-multiple-outline" size={20} color={COLORS.primary} style={styles.sectionIcon} />
+                        <View style={styles.iconContainer}>
+                            <MaterialCommunityIcons name="file-document-multiple-outline" size={24} color={COLORS.primary} />
+                        </View>
                         <Text style={styles.sectionTitle}>Documents Required</Text>
                     </View>
                     <View style={styles.bulletList}>
@@ -119,22 +130,20 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
 
             </ScrollView>
 
-            {/* Bottom Actions */}
-            <View style={styles.footer}>
+            {/* Bottom Floating Action Bar */}
+            <View style={styles.fabContainer}>
                 <TouchableOpacity
                     style={[styles.button, styles.secondaryButton]}
                     onPress={() => Alert.alert('Coming Soon', 'Eligibility check feature is under development.')}
                 >
                     <Text style={styles.secondaryButtonText}>Check Eligibility</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
-                    style={[styles.button, styles.primaryButton, styles.disabledButton]}
-                    disabled={true}
+                    style={[styles.button, styles.primaryButton]}
                     onPress={() => { }}
+                    activeOpacity={0.8}
                 >
-                    <Text style={styles.primaryButtonText}>Apply Online</Text>
-                    <Text style={styles.disabledLabel}>(Coming Soon)</Text>
+                    <Text style={styles.primaryButtonText}>Apply Now</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -157,17 +166,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     scrollContent: {
-        padding: SPACING.m,
-        paddingBottom: 100, // space for footer
+        padding: SPACING.l,
+        paddingBottom: 120, // space for footer
     },
-    headerCard: {
-        backgroundColor: COLORS.surface,
-        borderRadius: 12,
-        padding: SPACING.m,
-        marginBottom: SPACING.l,
-        ...SHADOWS.light,
-        borderWidth: 1,
-        borderColor: COLORS.border,
+    backButton: {
+        marginBottom: SPACING.m,
+        padding: SPACING.xs,
+    },
+    titleBlock: {
+        marginBottom: SPACING.xl,
     },
     tagContainer: {
         flexDirection: 'row',
@@ -175,9 +182,11 @@ const styles = StyleSheet.create({
     },
     tag: {
         paddingHorizontal: SPACING.s,
-        paddingVertical: 4,
-        borderRadius: 16, // Pill shape
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: COLORS.surface,
         borderWidth: 1,
+        borderColor: COLORS.border,
     },
     tagCentral: {
         backgroundColor: '#e8f0fe',
@@ -188,7 +197,7 @@ const styles = StyleSheet.create({
         borderColor: '#fad2cf',
     },
     tagText: {
-        fontSize: FONT_SIZE.xs,
+        fontSize: FONT_SIZE.s,
         fontWeight: '700',
         textTransform: 'uppercase',
     },
@@ -199,97 +208,113 @@ const styles = StyleSheet.create({
         color: '#c5221f',
     },
     title: {
-        fontSize: FONT_SIZE.xl,
-        fontWeight: '700',
+        fontSize: FONT_SIZE.xxxl, // Maximum size
+        fontWeight: '800',
         color: COLORS.text,
-        marginBottom: SPACING.s,
+        marginBottom: SPACING.m,
+        lineHeight: 44,
     },
     shortDescription: {
-        fontSize: FONT_SIZE.m,
+        fontSize: FONT_SIZE.l,
         color: COLORS.textLight,
-        lineHeight: 24,
+        lineHeight: 28,
     },
-    section: {
-        marginBottom: SPACING.xl,
+    sectionCard: {
+        backgroundColor: COLORS.surface,
+        borderRadius: 24,
+        padding: SPACING.l,
+        marginBottom: SPACING.l,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        ...SHADOWS.card,
     },
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.s,
+        marginBottom: SPACING.m,
     },
-    sectionIcon: {
-        marginRight: SPACING.s,
+    iconContainer: {
+        backgroundColor: '#e8f0fe',
+        padding: 10,
+        borderRadius: 12,
+        marginRight: SPACING.m,
     },
     sectionTitle: {
-        fontSize: FONT_SIZE.l,
+        fontSize: FONT_SIZE.xl,
         fontWeight: '700',
         color: COLORS.text,
     },
     sectionContent: {
-        fontSize: FONT_SIZE.m,
+        fontSize: FONT_SIZE.l,
         color: COLORS.text,
-        lineHeight: 24,
-        marginLeft: SPACING.xl + SPACING.xs, // Indent to align with text start, skipping icon
+        lineHeight: 28,
     },
     chipContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginLeft: SPACING.xl + SPACING.xs,
-        marginBottom: SPACING.s,
+        marginBottom: SPACING.m,
     },
     categoryChip: {
         backgroundColor: COLORS.background,
         borderWidth: 1,
         borderColor: COLORS.border,
-        paddingHorizontal: SPACING.s,
-        paddingVertical: 4,
-        borderRadius: 8,
+        paddingHorizontal: SPACING.m,
+        paddingVertical: 8,
+        borderRadius: 12,
         marginRight: SPACING.s,
         marginBottom: SPACING.s,
     },
     categoryText: {
-        fontSize: FONT_SIZE.s,
-        color: COLORS.text,
-        fontWeight: '500',
-    },
-    bulletList: {
-        marginLeft: SPACING.xl + SPACING.xs,
-    },
-    bulletItem: {
         fontSize: FONT_SIZE.m,
         color: COLORS.text,
-        marginBottom: SPACING.xs,
+        fontWeight: '600',
     },
-    footer: {
+    bulletList: {
+        marginTop: SPACING.xs,
+    },
+    bulletItem: {
+        fontSize: FONT_SIZE.l,
+        color: COLORS.text,
+        marginBottom: SPACING.s,
+        lineHeight: 28,
+    },
+    fabContainer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
         backgroundColor: COLORS.surface,
-        padding: SPACING.m,
+        padding: SPACING.l,
+        paddingBottom: SPACING.xl,
         borderTopWidth: 1,
         borderTopColor: COLORS.border,
         flexDirection: 'row',
         gap: SPACING.m,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 10,
     },
     button: {
         flex: 1,
         paddingVertical: SPACING.m,
-        borderRadius: 12,
+        borderRadius: 16, // Rounder buttons
         alignItems: 'center',
         justifyContent: 'center',
     },
     secondaryButton: {
         backgroundColor: COLORS.surface,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: COLORS.primary,
     },
     primaryButton: {
         backgroundColor: COLORS.primary,
-    },
-    disabledButton: {
-        backgroundColor: COLORS.secondary,
-        opacity: 0.7,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
     },
     secondaryButtonText: {
         color: COLORS.primary,
@@ -297,14 +322,9 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.m,
     },
     primaryButtonText: {
-        color: COLORS.surface,
+        color: COLORS.white,
         fontWeight: '700',
         fontSize: FONT_SIZE.m,
-    },
-    disabledLabel: {
-        color: COLORS.surface,
-        fontSize: 10,
-        marginTop: 2,
     },
 });
 

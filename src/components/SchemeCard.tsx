@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-nativ
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SPACING, FONT_SIZE, SHADOWS } from '../constants/theme';
 import { Scheme } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SchemeCardProps {
     scheme: Scheme;
@@ -15,6 +16,7 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
     onPress,
     style
 }) => {
+    const { t } = useLanguage();
     const isCentral = scheme.state_type === 'central';
 
     return (
@@ -23,26 +25,28 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
             onPress={onPress}
             activeOpacity={0.9}
         >
-            <View style={styles.headerRow}>
-                <View style={styles.titleContainer}>
-                    <Text style={styles.title} numberOfLines={2}>
-                        {scheme.name}
-                    </Text>
-                </View>
+            <View style={styles.header}>
                 <View style={[styles.tag, isCentral ? styles.tagCentral : styles.tagState]}>
                     <Text style={[styles.tagText, isCentral ? styles.tagTextCentral : styles.tagTextState]}>
-                        {isCentral ? 'Central' : 'State'}
+                        {isCentral ? t('centralGov') : t('stateGov')}
                     </Text>
                 </View>
+                {/* Optional: Add save/bookmark icon here */}
             </View>
 
-            <Text style={styles.description} numberOfLines={2}>
+            <Text style={styles.title} numberOfLines={2}>
+                {scheme.name}
+            </Text>
+
+            <Text style={styles.description} numberOfLines={3}>
                 {scheme.short_description}
             </Text>
 
+            <View style={styles.divider} />
+
             <View style={styles.footer}>
-                <Text style={styles.benefitLabel}>Tap to view details</Text>
-                <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.primary} />
+                <Text style={styles.learnMore}>{t('learnMore')}</Text>
+                <MaterialCommunityIcons name="arrow-right" size={24} color={COLORS.primary} />
             </View>
         </TouchableOpacity>
     );
@@ -51,71 +55,69 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
 const styles = StyleSheet.create({
     card: {
         backgroundColor: COLORS.surface,
-        borderRadius: 12,
-        marginVertical: SPACING.xs,
-        marginHorizontal: SPACING.m,
-        padding: SPACING.m,
-        ...SHADOWS.light,
+        borderRadius: 24, // Much rounder
+        marginBottom: SPACING.l, // More space between cards
+        ...SHADOWS.card,
         borderWidth: 1,
         borderColor: COLORS.border,
+        padding: SPACING.l,
     },
-    headerRow: {
+    header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: SPACING.xs,
-    },
-    titleContainer: {
-        flex: 1,
-        marginRight: SPACING.s,
-    },
-    title: {
-        fontSize: FONT_SIZE.m,
-        fontWeight: '700',
-        color: COLORS.text,
-        lineHeight: 22,
+        marginBottom: SPACING.m,
     },
     tag: {
-        paddingHorizontal: SPACING.xs,
-        paddingVertical: 2,
-        borderRadius: 4,
-        borderWidth: 1,
+        paddingHorizontal: SPACING.s,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: COLORS.background,
     },
     tagCentral: {
-        backgroundColor: '#e8f0fe',
-        borderColor: '#d2e3fc',
+        backgroundColor: COLORS.primaryLight,
     },
     tagState: {
-        backgroundColor: '#fce8e6',
-        borderColor: '#fad2cf',
+        backgroundColor: '#FFF0F0', // Very light red
     },
     tagText: {
-        fontSize: 10,
-        fontWeight: '700',
+        fontSize: FONT_SIZE.xs,
+        fontWeight: 'bold',
         textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
     tagTextCentral: {
-        color: '#1967d2',
+        color: COLORS.primary,
     },
     tagTextState: {
-        color: '#c5221f',
+        color: COLORS.danger,
+    },
+    title: {
+        fontSize: FONT_SIZE.xl, // Larger title
+        fontWeight: '800', // Bolder
+        color: COLORS.text,
+        marginBottom: SPACING.s,
+        lineHeight: 30,
     },
     description: {
-        fontSize: FONT_SIZE.s,
+        fontSize: FONT_SIZE.m,
         color: COLORS.textLight,
-        lineHeight: 20,
-        marginBottom: SPACING.s,
+        lineHeight: 24,
+        marginBottom: SPACING.l,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: COLORS.border,
+        marginBottom: SPACING.m,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: SPACING.xxs,
     },
-    benefitLabel: {
-        fontSize: FONT_SIZE.xs,
+    learnMore: {
+        fontSize: FONT_SIZE.m,
+        fontWeight: '700',
         color: COLORS.primary,
-        fontWeight: '500',
     },
 });
 

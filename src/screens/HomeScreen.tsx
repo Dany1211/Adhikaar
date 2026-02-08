@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     StyleSheet,
     View,
@@ -10,20 +10,27 @@ import {
     StatusBar,
     Alert,
     Image,
+    TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS, SPACING, FONT_SIZE, SHADOWS } from '../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CategoryPill from '../components/CategoryPill';
 import SchemeCard from '../components/SchemeCard';
 import { fetchCategories, fetchSchemes, Category, Scheme } from '../services/api';
-import { COLORS, SPACING, FONT_SIZE } from '../constants/theme';
+import { useLanguage } from '../context/LanguageContext';
 
 const HomeScreen = () => {
     const navigation = useNavigation<any>();
+    const { t } = useLanguage();
     const [categories, setCategories] = useState<Category[]>([]);
     const [schemes, setSchemes] = useState<Scheme[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Filter State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -46,58 +53,71 @@ const HomeScreen = () => {
     };
 
     const handleCategoryPress = (category: Category) => {
-        // In a real app, this would filter or navigate
-        console.log('Category pressed:', category.label);
+        // Toggle selection
+        setSelectedCategoryId(prev => prev === category.id ? null : category.id);
     };
 
     const handleSchemePress = (scheme: Scheme) => {
         navigation.navigate('SchemeDetails', { schemeId: scheme.id });
     };
 
+    // Derived state for filtered schemes
+    const filteredSchemes = useMemo(() => {
+        return schemes.filter(scheme => {
+            // 1. Search Filter
+            const matchesSearch =
+                scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                scheme.short_description.toLowerCase().includes(searchQuery.toLowerCase());
+
+            // 2. Category Filter
+            // scheme.categories is an array of category IDs (strings)
+            // If selectedCategoryId is null, show all. 
+            // Otherwise, check if scheme.categories includes the selected ID.
+            const matchesCategory = selectedCategoryId
+                ? scheme.categories && scheme.categories.includes(selectedCategoryId)
+                : true;
+
+            return matchesSearch && matchesCategory;
+        });
+    }, [schemes, searchQuery, selectedCategoryId]);
+
     const renderHeader = () => (
         <View style={styles.headerContainer}>
-            {/* Greeting */}
-            <View style={styles.greetingSection}>
-                <Text style={styles.greetingTitle}>Find schemes you're eligible for</Text>
-                <Text style={styles.greetingSubtitle}>Explore government benefits tailored to you</Text>
+
+
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <MaterialCommunityIcons name="magnify" size={24} color={COLORS.secondary} style={styles.searchIcon} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder={t('searchPlaceholder')}
+                    placeholderTextColor={COLORS.textLight}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchQuery('')}>
+                        <MaterialCommunityIcons name="close-circle" size={20} color={COLORS.secondary} />
+                    </TouchableOpacity>
+                )}
             </View>
 
-            {/* Primary Actions Grid */}
-            <View style={styles.actionGrid}>
-                <TouchableOpacity
-                    style={[styles.actionCard, styles.primaryActionCard]}
-                    onPress={() => Alert.alert('Coming Soon', 'Eligibility check feature is under development.')}
-                    activeOpacity={0.8}
-                >
-                    <View style={styles.iconContainerPrimary}>
-                        <Image
-                            source={require('../assets/illustrations/eligibility.png')}
-                            style={styles.actionIconImage}
-                            resizeMode="contain"
-                        />
-                    </View>
-                    <Text style={styles.primaryActionText}>Check Eligibility</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.actionCard, styles.secondaryActionCard]}
-                    onPress={() => navigation.navigate('MyApplications')}
-                    activeOpacity={0.8}
-                >
-                    <View style={styles.iconContainerSecondary}>
-                        <Image
-                            source={require('../assets/illustrations/my_applications.png')}
-                            style={styles.actionIconImage}
-                            resizeMode="contain"
-                        />
-                    </View>
-                    <Text style={styles.secondaryActionText}>My Applications</Text>
-                </TouchableOpacity>
+            {/* Greeting (Optional, kept smaller) */}
+            <View style={styles.greetingSection}>
+                <Text style={styles.greetingTitle}>{t('findSchemesTitle')}</Text>
             </View>
 
             {/* Categories */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Browse by Category</Text>
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>{t('browseCategory')}</Text>
+                    {selectedCategoryId && (
+                        <TouchableOpacity onPress={() => setSelectedCategoryId(null)}>
+                            <Text style={styles.clearFilter}>{t('clear')}</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -107,6 +127,7 @@ const HomeScreen = () => {
                         <CategoryPill
                             key={category.id}
                             label={category.label}
+                            isActive={selectedCategoryId === category.id}
                             onPress={() => handleCategoryPress(category)}
                         />
                     ))}
@@ -115,7 +136,10 @@ const HomeScreen = () => {
 
             {/* Featured Schemes Header */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Featured Schemes</Text>
+                <Text style={styles.sectionTitle}>
+                    {searchQuery || selectedCategoryId ? t('results') : t('featuredSchemes')}
+                    <Text style={styles.resultsCount}> ({filteredSchemes.length})</Text>
+                </Text>
             </View>
         </View>
     );
@@ -132,7 +156,7 @@ const HomeScreen = () => {
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
             <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
             <FlatList
-                data={schemes}
+                data={filteredSchemes}
                 renderItem={({ item }) => (
                     <SchemeCard
                         scheme={item}
@@ -143,8 +167,12 @@ const HomeScreen = () => {
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
-                // Add footer padding to ensure content is reachable
-                ListFooterComponent={<View style={{ height: SPACING.xl }} />}
+                ListFooterComponent={<View style={{ height: SPACING.xxl }} />}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>{t('noSchemes')}</Text>
+                    </View>
+                }
             />
         </SafeAreaView>
     );
@@ -166,88 +194,74 @@ const styles = StyleSheet.create({
     headerContainer: {
         paddingBottom: SPACING.s,
     },
-    greetingSection: {
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.surface,
+        marginHorizontal: SPACING.l,
         paddingHorizontal: SPACING.m,
-        paddingTop: SPACING.m,
+        borderRadius: 12, // Softer radius
+        height: 50,
+        marginBottom: SPACING.l,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        ...SHADOWS.light, // Use subtle shadow
+    },
+    searchIcon: {
+        marginRight: SPACING.s,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: FONT_SIZE.m,
+        color: COLORS.text,
+        height: '100%',
+    },
+    greetingSection: {
+        paddingHorizontal: SPACING.l,
         marginBottom: SPACING.l,
     },
     greetingTitle: {
-        fontSize: FONT_SIZE.xxl,
-        fontWeight: 'bold',
+        fontSize: FONT_SIZE.xl,
+        fontWeight: '700',
         color: COLORS.text,
-        marginBottom: SPACING.xxs,
-    },
-    greetingSubtitle: {
-        fontSize: FONT_SIZE.m,
-        color: COLORS.textLight,
-    },
-    actionGrid: {
-        flexDirection: 'row',
-        paddingHorizontal: SPACING.m,
-        gap: SPACING.m,
-        marginBottom: SPACING.l,
-    },
-    actionCard: {
-        flex: 1,
-        padding: SPACING.m,
-        borderRadius: 12,
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        minHeight: 100,
-        // Shadows
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    primaryActionCard: {
-        backgroundColor: COLORS.primary,
-    },
-    secondaryActionCard: {
-        backgroundColor: COLORS.surface,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-    },
-    iconContainerPrimary: {
-        marginBottom: SPACING.s,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        padding: 8,
-        borderRadius: 8,
-    },
-    iconContainerSecondary: {
-        marginBottom: SPACING.s,
-        backgroundColor: COLORS.background,
-        padding: 8,
-        borderRadius: 8,
-    },
-    actionIconImage: {
-        width: 32,
-        height: 32,
-    },
-    primaryActionText: {
-        color: COLORS.surface,
-        fontSize: FONT_SIZE.m,
-        fontWeight: '700',
-    },
-    secondaryActionText: {
-        color: COLORS.primary,
-        fontSize: FONT_SIZE.m,
-        fontWeight: '700',
+        lineHeight: 32,
     },
     section: {
-        marginBottom: SPACING.s,
+        marginBottom: SPACING.m,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.l,
+        marginBottom: SPACING.m,
     },
     sectionTitle: {
         fontSize: FONT_SIZE.l,
         fontWeight: '700',
         color: COLORS.text,
-        marginLeft: SPACING.m,
-        marginBottom: SPACING.s,
+    },
+    resultsCount: {
+        fontSize: FONT_SIZE.m,
+        fontWeight: 'normal',
+        color: COLORS.textLight,
+    },
+    clearFilter: {
+        fontSize: FONT_SIZE.s,
+        color: COLORS.primary,
+        fontWeight: '600',
     },
     categoriesList: {
-        paddingHorizontal: SPACING.m,
+        paddingHorizontal: SPACING.l,
         paddingBottom: SPACING.s,
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        marginTop: SPACING.xl,
+    },
+    emptyText: {
+        color: COLORS.textLight,
+        fontSize: FONT_SIZE.m,
     },
 });
 

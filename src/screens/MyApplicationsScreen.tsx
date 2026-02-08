@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RootStackParamList } from '../navigation/types';
-import { COLORS, SPACING, FONT_SIZE } from '../constants/theme';
+import { COLORS, SPACING, FONT_SIZE, SHADOWS } from '../constants/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MyApplications'>;
 
@@ -51,35 +50,37 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        padding: SPACING.m,
+        padding: SPACING.l,
     },
     title: {
-        fontSize: FONT_SIZE.xl,
-        fontWeight: 'bold',
+        fontSize: FONT_SIZE.xxxl,
+        fontWeight: '900', // Heavy bold
         color: COLORS.text,
-        marginBottom: SPACING.l,
+        marginBottom: SPACING.xl,
+        marginTop: SPACING.m,
     },
     listContainer: {
-        paddingBottom: SPACING.m,
+        paddingBottom: SPACING.l,
         flexGrow: 1,
     },
     card: {
-        backgroundColor: COLORS.white,
-        padding: SPACING.m,
-        borderRadius: 8,
+        backgroundColor: COLORS.surface,
+        padding: SPACING.l,
+        borderRadius: 16,
         marginBottom: SPACING.m,
+        ...SHADOWS.card,
         borderWidth: 1,
         borderColor: COLORS.border,
     },
     cardTitle: {
-        fontSize: FONT_SIZE.l,
-        fontWeight: 'bold',
+        fontSize: FONT_SIZE.xl,
+        fontWeight: '700',
         color: COLORS.text,
         marginBottom: SPACING.s,
     },
     statusText: {
         fontSize: FONT_SIZE.m,
-        fontWeight: 'bold',
+        fontWeight: '700',
     },
     statusApproved: {
         color: COLORS.success,
@@ -91,25 +92,26 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: SPACING.xl,
+        marginTop: SPACING.xxl,
     },
     emptyStateImage: {
-        width: 150,
-        height: 150,
-        marginBottom: SPACING.m,
+        width: 200, // Maximized image
+        height: 200,
+        marginBottom: SPACING.l,
     },
     emptyStateTitle: {
-        fontSize: FONT_SIZE.l,
-        fontWeight: 'bold',
+        fontSize: FONT_SIZE.xxl,
+        fontWeight: '800',
         color: COLORS.text,
-        marginTop: SPACING.s,
+        marginTop: SPACING.m,
     },
     emptyStateSubtitle: {
-        fontSize: FONT_SIZE.m,
+        fontSize: FONT_SIZE.l,
         color: COLORS.textLight,
         textAlign: 'center',
-        marginTop: SPACING.s,
+        marginTop: SPACING.m,
         paddingHorizontal: SPACING.l,
+        lineHeight: 28,
     },
 });
 

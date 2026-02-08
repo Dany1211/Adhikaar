@@ -19,50 +19,58 @@ const WelcomeScreen = ({ navigation }: Props) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.languageContainer}>
-                {languages.map((lang) => (
-                    <Pressable
-                        key={lang.code}
-                        style={[
-                            styles.languageButton,
-                            language === lang.code && styles.languageButtonActive,
-                        ]}
-                        onPress={() => setLanguage(lang.code)}
-                    >
-                        <Text
+            <View style={styles.header}>
+                <View style={styles.languageContainer}>
+                    {languages.map((lang) => (
+                        <Pressable
+                            key={lang.code}
                             style={[
-                                styles.languageText,
-                                language === lang.code && styles.languageTextActive,
+                                styles.languageButton,
+                                language === lang.code && styles.languageButtonActive,
                             ]}
+                            onPress={() => setLanguage(lang.code)}
                         >
-                            {lang.label}
-                        </Text>
-                    </Pressable>
-                ))}
+                            <Text
+                                style={[
+                                    styles.languageText,
+                                    language === lang.code && styles.languageTextActive,
+                                ]}
+                            >
+                                {lang.label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
             </View>
 
             {/* Top content */}
             <View style={styles.content}>
-                <Text style={styles.title}>{t('welcomeTitle')}</Text>
-                <Text style={styles.subtitle}>{t('welcomeSubtitle')}</Text>
+                <Text style={styles.title}>Government Schemes{'\n'}Made Easy</Text>
+                <Text style={styles.subtitle}>Find benefits tailored for you in seconds.</Text>
+
+                <View style={styles.divider} />
 
                 <Text style={styles.description}>
-                    {t('welcomeDescription')}
+                    One-stop access to subsidies, scholarships, and pensions. No more paperwork confusion.
                 </Text>
             </View>
 
             {/* CTA */}
-            <Pressable
-                style={styles.button}
-                onPress={() => navigation.navigate('Home')}
-            >
-                <Text style={styles.buttonText}>{t('getStarted')}</Text>
-            </Pressable>
+            <View style={styles.footer}>
+                <Pressable
+                    style={({ pressed }) => [
+                        styles.button,
+                        pressed && styles.buttonPressed
+                    ]}
+                    onPress={() => navigation.navigate('Home')}
+                >
+                    <Text style={styles.buttonText}>{t('getStarted')}</Text>
+                </Pressable>
 
-            {/* Footer */}
-            <Text style={styles.footerText}>
-                {t('footerText')}
-            </Text>
+                <Text style={styles.footerText}>
+                    100% Free & Secure • Government Data
+                </Text>
+            </View>
         </View>
     );
 };
@@ -74,74 +82,95 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
         justifyContent: 'space-between',
     },
+    header: {
+        marginTop: SPACING.xxl,
+        alignItems: 'center',
+    },
     languageContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: SPACING.xl, // Added margin top for status bar spacing
+        backgroundColor: COLORS.surface,
+        borderRadius: 30,
+        padding: 4,
+        borderWidth: 1,
+        borderColor: COLORS.border,
     },
     languageButton: {
-        paddingVertical: SPACING.s,
-        paddingHorizontal: SPACING.m,
-        marginHorizontal: SPACING.xs,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: COLORS.primary,
-        backgroundColor: COLORS.white,
+        paddingVertical: 10,
+        paddingHorizontal: SPACING.l,
+        borderRadius: 26,
     },
     languageButtonActive: {
-        backgroundColor: COLORS.primary,
+        backgroundColor: COLORS.primaryLight,
     },
     languageText: {
-        color: COLORS.primary,
+        color: COLORS.text,
         fontSize: FONT_SIZE.m,
         fontWeight: '600',
     },
     languageTextActive: {
-        color: COLORS.white,
-    },
-
-    content: {
-        marginTop: SPACING.m,
-    },
-
-    title: {
-        fontSize: FONT_SIZE.xxl,
-        fontWeight: '800',
-        color: COLORS.text,
-        marginBottom: SPACING.s,
-    },
-
-    subtitle: {
-        fontSize: FONT_SIZE.l,
         color: COLORS.primary,
+        fontWeight: '700',
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    title: {
+        fontSize: FONT_SIZE.xxxl, // Hero size
+        fontWeight: '900',
+        color: COLORS.text,
+        marginBottom: SPACING.m,
+        lineHeight: 44,
+        letterSpacing: -0.5,
+    },
+    subtitle: {
+        fontSize: FONT_SIZE.xl,
+        color: COLORS.textLight,
+        marginBottom: SPACING.l,
+        lineHeight: 32,
+    },
+    divider: {
+        width: 60,
+        height: 6,
+        backgroundColor: COLORS.primary,
+        borderRadius: 3,
         marginBottom: SPACING.l,
     },
-
     description: {
-        fontSize: FONT_SIZE.m,
-        color: COLORS.textLight,
-        lineHeight: 22,
+        fontSize: FONT_SIZE.l,
+        color: COLORS.secondary,
+        lineHeight: 28,
         maxWidth: 320,
     },
-
+    footer: {
+        marginBottom: SPACING.l,
+    },
     button: {
         backgroundColor: COLORS.primary,
-        paddingVertical: SPACING.m,
-        borderRadius: 10,
+        paddingVertical: 20, // Taller button
+        borderRadius: 16,
         alignItems: 'center',
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 6,
+        marginBottom: SPACING.m,
     },
-
+    buttonPressed: {
+        opacity: 0.9,
+        transform: [{ scale: 0.98 }],
+    },
     buttonText: {
         color: '#fff',
-        fontSize: FONT_SIZE.l,
-        fontWeight: '600',
+        fontSize: FONT_SIZE.xl,
+        fontWeight: '700',
     },
-
     footerText: {
         textAlign: 'center',
         fontSize: FONT_SIZE.s,
         color: COLORS.textLight,
-        marginBottom: SPACING.m,
+        fontWeight: '500',
     },
 });
 
