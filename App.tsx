@@ -6,10 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { RootStackParamList } from './src/navigation/types';
 import WelcomeScreen from './src/screens/WelcomeScreen';
-import LanguageSelectionScreen from './src/screens/LanguageSelectionScreen';
+
 import HomeScreen from './src/screens/HomeScreen';
-import EligibilityQuestionsScreen from './src/screens/EligibilityQuestionsScreen';
-import EligibilityResultsScreen from './src/screens/EligibilityResultsScreen';
 import SchemeDetailsScreen from './src/screens/SchemeDetailsScreen';
 import MyApplicationsScreen from './src/screens/MyApplicationsScreen';
 
@@ -24,11 +22,8 @@ function App(): React.JSX.Element {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            {/* LanguageSelectionScreen is now integrated into WelcomeScreen, but keeping route just in case for now, or remove if fully deprecated. Plan said merge. */}
-            <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
+            {/* LanguageSelectionScreen removed as it is merged into WelcomeScreen */}
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="EligibilityQuestions" component={EligibilityQuestionsScreen} />
-            <Stack.Screen name="EligibilityResults" component={EligibilityResultsScreen} />
             <Stack.Screen name="SchemeDetails" component={SchemeDetailsScreen} options={{ headerShown: true, title: 'Scheme Details' }} />
             <Stack.Screen name="MyApplications" component={MyApplicationsScreen} options={{ headerShown: true, title: 'My Applications' }} />
           </Stack.Navigator>
