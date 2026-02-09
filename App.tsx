@@ -24,7 +24,7 @@ function App(): React.JSX.Element {
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             {/* LanguageSelectionScreen removed as it is merged into WelcomeScreen */}
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="SchemeDetails" component={SchemeDetailsScreen} options={{ headerShown: true, title: 'Scheme Details' }} />
+            <Stack.Screen name="SchemeDetails" component={SchemeDetailsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="MyApplications" component={MyApplicationsScreen} options={{ headerShown: true, title: 'My Applications' }} />
           </Stack.Navigator>
         </NavigationContainer>

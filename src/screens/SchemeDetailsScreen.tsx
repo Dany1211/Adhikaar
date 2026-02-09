@@ -6,7 +6,9 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
-    Alert
+    Alert,
+    Platform,
+    StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -30,9 +32,15 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
 
     const loadDetails = async () => {
         setLoading(true);
-        const data = await fetchSchemeDetails(schemeId);
-        setScheme(data);
-        setLoading(false);
+        try {
+            const data = await fetchSchemeDetails(schemeId);
+            setScheme(data);
+        } catch (error) {
+            console.error('Error fetching scheme details:', error);
+            Alert.alert('Error', 'Failed to load scheme details.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (loading) {
@@ -46,116 +54,138 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
     if (!scheme) {
         return (
             <View style={styles.errorContainer}>
-                <Text>Scheme not found</Text>
+                <Text style={styles.errorText}>Scheme not found</Text>
+                <TouchableOpacity style={styles.backButtonSimple} onPress={() => navigation.goBack()}>
+                    <Text style={styles.backButtonText}>Go Back</Text>
+                </TouchableOpacity>
             </View>
         );
     }
 
     const isCentral = scheme.state_type === 'central';
 
-    const renderSection = (title: string, icon: string, content: string | undefined) => {
+    const renderSectionCard = (title: string, icon: string, content: React.ReactNode) => {
         if (!content) return null;
         return (
-            <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
                     <View style={styles.iconContainer}>
-                        <MaterialCommunityIcons name={icon} size={22} color={COLORS.primary} />
+                        <MaterialCommunityIcons name={icon} size={20} color={COLORS.primary} />
                     </View>
-                    <Text style={styles.sectionTitle}>{title}</Text>
+                    <Text style={styles.cardTitle}>{title}</Text>
                 </View>
-                <Text style={styles.sectionContent}>{content}</Text>
+                <View style={styles.cardContent}>
+                    {content}
+                </View>
             </View>
         );
     };
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-                    {/* Header Controls */}
+            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+            <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+                <View style={styles.headerBar}>
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigation.goBack()}
                     >
                         <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.text} />
                     </TouchableOpacity>
+                    <Text style={styles.headerTitle} numberOfLines={1}>{scheme.name}</Text>
+                    <View style={{ width: 40 }} />
+                </View>
 
-                    {/* Title Block */}
-                    <View style={styles.titleBlock}>
-                        <View style={styles.tagContainer}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Header / Title Section */}
+                    <View style={styles.titleSection}>
+                        <View style={styles.tagsRow}>
                             <View style={[styles.tag, isCentral ? styles.tagCentral : styles.tagState]}>
                                 <Text style={[styles.tagText, isCentral ? styles.tagTextCentral : styles.tagTextState]}>
                                     {isCentral ? t('centralGov') : t('stateGov')}
                                 </Text>
                             </View>
-                        </View>
-                        <Text style={styles.title}>{scheme.name}</Text>
-                        <Text style={styles.shortDescription}>{scheme.short_description}</Text>
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    {/* Content Sections */}
-                    {renderSection(t('keyBenefits'), 'gift-outline', scheme.benefits)}
-
-                    <View style={styles.sectionContainer}>
-                        <View style={styles.sectionHeader}>
-                            <View style={styles.iconContainer}>
-                                <MaterialCommunityIcons name="account-group-outline" size={22} color={COLORS.primary} />
-                            </View>
-                            <Text style={styles.sectionTitle}>{t('whoCanApply')}</Text>
-                        </View>
-                        <View style={styles.chipContainer}>
-                            {scheme.categories.map((cat, index) => (
-                                <View key={index} style={styles.categoryChip}>
-                                    <Text style={styles.categoryText}>{cat}</Text>
+                            {/* Category Tags */}
+                            {scheme.categories.slice(0, 2).map((cat, index) => (
+                                <View key={`header-cat-${index}`} style={styles.categoryTag}>
+                                    <Text style={styles.categoryTagText} numberOfLines={1}>{cat}</Text>
                                 </View>
                             ))}
                         </View>
+
+                        <Text style={styles.mainTitle}>{scheme.name}</Text>
+                        <Text style={styles.shortDescription}>{scheme.short_description}</Text>
                     </View>
 
-                    <View style={styles.sectionContainer}>
-                        <View style={styles.sectionHeader}>
-                            <View style={styles.iconContainer}>
-                                <MaterialCommunityIcons name="file-document-multiple-outline" size={22} color={COLORS.primary} />
-                            </View>
-                            <Text style={styles.sectionTitle}>{t('documentsRequired')}</Text>
-                        </View>
-                        <View style={styles.bulletList}>
-                            <Text style={styles.bulletItem}>• Aadhar Card</Text>
-                            <Text style={styles.bulletItem}>• Residence Proof</Text>
-                            <Text style={styles.bulletItem}>• Bank Account Details</Text>
-                            <Text style={styles.bulletItem}>• Income Certificate (if applicable)</Text>
-                        </View>
-                    </View>
+                    {/* Benefits Card */}
+                    {renderSectionCard(
+                        t('keyBenefits'),
+                        'gift-outline',
+                        <Text style={styles.bodyText}>{scheme.benefits}</Text>
+                    )}
 
-                    <View style={styles.noteContainer}>
+                    {/* Eligibility Card */}
+                    {renderSectionCard(
+                        t('whoCanApply'),
+                        'account-group-outline',
+                        <View style={styles.chipContainer}>
+                            {scheme.categories.map((cat, index) => (
+                                <View key={index} style={styles.chip}>
+                                    <Text style={styles.chipText}>{cat}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+
+                    {/* Documents Card */}
+                    {renderSectionCard(
+                        t('documentsRequired'),
+                        'file-document-multiple-outline',
+                        <View style={styles.listContainer}>
+                            {[
+                                'Aadhar Card',
+                                'Residence Proof',
+                                'Bank Account Details',
+                                'Income Certificate (if applicable)'
+                            ].map((item, idx) => (
+                                <View key={idx} style={styles.listItem}>
+                                    <View style={styles.bulletPoint} />
+                                    <Text style={styles.listText}>{item}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+
+                    {/* Additional Guidelines Note */}
+                    <View style={styles.noteCard}>
+                        <MaterialCommunityIcons name="information-outline" size={20} color={COLORS.secondary} style={{ marginRight: 8 }} />
                         <Text style={styles.noteText}>{t('seeGuidelines')}</Text>
                     </View>
 
-                    {/* Space for FAB */}
+                    {/* Bottom Padding for FAB */}
                     <View style={{ height: 100 }} />
-
                 </ScrollView>
-            </SafeAreaView>
 
-            {/* Bottom Floating Action Bar */}
-            <View style={styles.fabContainer}>
-                <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
-                    onPress={() => Alert.alert(t('comingSoon'), t('eligibilityFeature'))}
-                >
-                    <Text style={styles.secondaryButtonText}>{t('checkEligibility')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.button, styles.primaryButton]}
-                    onPress={() => { }}
-                    activeOpacity={0.8}
-                >
-                    <Text style={styles.primaryButtonText}>{t('applyNow')}</Text>
-                </TouchableOpacity>
-            </View>
+                {/* Bottom Floating Action Bar */}
+                <View style={styles.fabContainer}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.secondaryButton]}
+                        onPress={() => Alert.alert(t('comingSoon'), t('eligibilityFeature'))}
+                    >
+                        <Text style={styles.secondaryButtonText}>{t('checkEligibility')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.primaryButton]}
+                        onPress={() => { }}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.primaryButtonText}>{t('applyNow')}</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
         </View>
     );
 };
@@ -177,13 +207,39 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: SPACING.xl,
     },
-    scrollContent: {
+    errorText: {
+        fontSize: FONT_SIZE.m,
+        color: COLORS.text,
+        marginBottom: SPACING.m,
+    },
+    backButtonSimple: {
+        padding: SPACING.m,
+    },
+    backButtonText: {
+        color: COLORS.primary,
+        fontWeight: '600',
+    },
+    // Header Bar
+    headerBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: SPACING.l,
-        paddingTop: SPACING.m,
+        paddingVertical: SPACING.s,
+        backgroundColor: COLORS.background,
+        zIndex: 10,
+    },
+    headerTitle: {
+        fontSize: FONT_SIZE.m,
+        fontWeight: '600',
+        color: COLORS.text,
+        flex: 1,
+        textAlign: 'center',
+        marginHorizontal: SPACING.s,
     },
     backButton: {
-        marginBottom: SPACING.l,
         width: 40,
         height: 40,
         borderRadius: 20,
@@ -192,18 +248,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         ...SHADOWS.light,
     },
-    titleBlock: {
-        marginBottom: SPACING.xl, // Increased spacing
+    scrollContent: {
+        padding: SPACING.l,
     },
-    tagContainer: {
+    // Title Section
+    titleSection: {
+        marginBottom: SPACING.xl,
+    },
+    tagsRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.xs,
         marginBottom: SPACING.m,
     },
     tag: {
-        paddingHorizontal: 12, // More padding
-        paddingVertical: 6,
-        borderRadius: 12, // softer
-        backgroundColor: COLORS.surface,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tagCentral: {
         backgroundColor: '#E0F2FE', // Light Blue
@@ -212,10 +275,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFE4E6', // Light Red
     },
     tagText: {
-        fontSize: FONT_SIZE.s, // Slightly larger
+        fontSize: FONT_SIZE.xs,
         fontWeight: '700',
         textTransform: 'uppercase',
-        letterSpacing: 0.5,
     },
     tagTextCentral: {
         color: COLORS.primary,
@@ -223,90 +285,123 @@ const styles = StyleSheet.create({
     tagTextState: {
         color: COLORS.danger,
     },
-    title: {
-        fontSize: 30, // Larger title
+    categoryTag: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    categoryTagText: {
+        fontSize: FONT_SIZE.xs,
+        color: COLORS.textLight,
+        fontWeight: '500',
+    },
+    mainTitle: {
+        fontSize: 28,
         fontWeight: '800',
         color: COLORS.text,
         marginBottom: SPACING.s,
-        lineHeight: 38,
+        lineHeight: 34,
         letterSpacing: -0.5,
     },
     shortDescription: {
         fontSize: FONT_SIZE.m,
         color: COLORS.secondary,
-        lineHeight: 26, // Better readability
+        lineHeight: 24,
     },
-    divider: {
-        height: 1,
-        backgroundColor: '#E2E8F0',
-        marginBottom: SPACING.xl,
+    // Cards
+    card: {
+        backgroundColor: COLORS.white,
+        borderRadius: 20,
+        padding: SPACING.l,
+        marginBottom: SPACING.l,
+        ...SHADOWS.light,
+        borderWidth: 1,
+        borderColor: 'rgba(226, 232, 240, 0.6)',
     },
-    // Documentation Sections
-    sectionContainer: {
-        marginBottom: SPACING.xxl, // More separation between sections
-    },
-    sectionHeader: {
+    cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: SPACING.m,
     },
     iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: 'rgba(0, 87, 255, 0.08)', // Very light primary
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: COLORS.primaryLight,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: SPACING.m,
+        marginRight: SPACING.s,
     },
-    sectionTitle: {
+    cardTitle: {
         fontSize: FONT_SIZE.l,
         fontWeight: '700',
         color: COLORS.text,
     },
-    sectionContent: {
-        fontSize: FONT_SIZE.m,
-        color: COLORS.text, // Darker text for readability
-        lineHeight: 28,
+    cardContent: {
+        // Content container
     },
+    bodyText: {
+        fontSize: FONT_SIZE.m,
+        color: COLORS.text,
+        lineHeight: 26,
+    },
+    // Chips
     chipContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        gap: SPACING.xs,
+    },
+    chip: {
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    chipText: {
+        fontSize: FONT_SIZE.s,
+        color: COLORS.text,
+        fontWeight: '500',
+    },
+    // List
+    listContainer: {
         gap: SPACING.s,
     },
-    categoryChip: {
-        backgroundColor: COLORS.white,
-        paddingHorizontal: SPACING.l,
-        paddingVertical: 10,
-        borderRadius: 24, // Pill shape
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
+    listItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    categoryText: {
+    bulletPoint: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: COLORS.primary,
+        marginRight: SPACING.s,
+        marginTop: 2,
+    },
+    listText: {
         fontSize: FONT_SIZE.m,
         color: COLORS.text,
-        fontWeight: '600',
+        lineHeight: 24,
     },
-    bulletList: {
-        marginTop: SPACING.xs,
-    },
-    bulletItem: {
-        fontSize: FONT_SIZE.m,
-        color: COLORS.text,
-        marginBottom: SPACING.s,
-        lineHeight: 26,
-    },
-    noteContainer: {
+    // Note
+    noteCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#F8FAFC',
         padding: SPACING.m,
-        borderRadius: 12,
+        borderRadius: 16,
         marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: COLORS.border,
     },
     noteText: {
         fontSize: FONT_SIZE.s,
         color: COLORS.textLight,
         fontStyle: 'italic',
-        textAlign: 'center',
+        flex: 1,
     },
     // FAB
     fabContainer: {
@@ -315,20 +410,16 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: COLORS.white,
-        padding: SPACING.l,
-        paddingBottom: SPACING.xl, // Safe area boost
+        paddingHorizontal: SPACING.l,
+        paddingVertical: SPACING.m,
+        paddingBottom: Platform.OS === 'ios' ? SPACING.xl : SPACING.m,
         borderTopWidth: 1,
-        borderTopColor: '#F1F5F9',
+        borderTopColor: COLORS.border,
         flexDirection: 'row',
         gap: SPACING.m,
-        // Strong shadow for floating feel
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 10,
+        ...SHADOWS.medium,
     },
-    button: {
+    actionButton: {
         flex: 1,
         paddingVertical: 16,
         borderRadius: 16,
@@ -336,15 +427,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     secondaryButton: {
-        backgroundColor: '#F1F5F9', // Light gray
+        backgroundColor: '#F1F5F9',
     },
     primaryButton: {
         backgroundColor: COLORS.primary,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
     },
     secondaryButtonText: {
         color: COLORS.text,
@@ -359,3 +445,4 @@ const styles = StyleSheet.create({
 });
 
 export default SchemeDetailsScreen;
+
