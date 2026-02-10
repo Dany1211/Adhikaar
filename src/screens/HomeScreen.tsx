@@ -196,7 +196,7 @@ const HomeScreen = () => {
                     />
                 )}
                 keyExtractor={(item) => item.id}
-                ListHeaderComponent={renderHeader}
+                ListHeaderComponent={renderHeader()}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 ListFooterComponent={<View style={{ height: SPACING.xxl }} />}
