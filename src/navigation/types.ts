@@ -3,4 +3,5 @@ export type RootStackParamList = {
     Home: undefined;
     SchemeDetails: { schemeId: string };
     MyApplications: undefined;
+    Chat: undefined;
 };

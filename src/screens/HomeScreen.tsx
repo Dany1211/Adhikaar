@@ -120,7 +120,7 @@ const HomeScreen = () => {
                 <View style={styles.bentoRow}>
                     <TouchableOpacity
                         style={[styles.bentoCard, { backgroundColor: COLORS.bento.yellow }]}
-                        onPress={() => Alert.alert('Coming Soon', 'Eligibility feature.')}
+                        onPress={() => navigation.navigate('Chat')}
                     >
                         <View style={styles.bentoIconContainer}>
                             <MaterialCommunityIcons name="clipboard-check" size={28} color={COLORS.black} />
