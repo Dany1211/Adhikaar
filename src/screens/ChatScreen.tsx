@@ -19,7 +19,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 // AI Modules
 import { initialEligibilityState, EligibilityState } from '../ai/eligibilityState';
-import { getNextQuestion } from '../ai/conversationController';
+import { getNextQuestion, inferFieldFromQuestion, detectDeterministicUpdate } from '../ai/conversationController';
 import { extractEligibilityInfo, generateExplanation } from '../ai/openRouterExtractor';
 import { checkEligibility } from '../ai/eligibilityEngine'; // Placeholder import if not ready yet
 import { Scheme } from '../services/api';
@@ -75,19 +75,35 @@ const ChatScreen = () => {
         addMessage(userText, 'user');
         setIsTyping(true);
 
-        try {
-            // 1. Extract Info using Gemini
-            const extractedUpdates = await extractEligibilityInfo(userText, eligibilityState.current);
-            console.log("Extracted Updates:", extractedUpdates);
+        // Get context from last message
+        const lastMessage = messages[messages.length - 1];
+        const lastBotQuestion = lastMessage?.sender === 'bot' ? lastMessage.text : null;
 
-            // 2. Update State
+        try {
+            // 1. Try Deterministic Update (Fast & Cheap)
+            // We need to import inferFieldFromQuestion and detectDeterministicUpdate which are now exported
+            const expectedField = lastBotQuestion ? inferFieldFromQuestion(lastBotQuestion) : null;
+            const deterministicUpdates = detectDeterministicUpdate(userText, expectedField);
+
+            console.log("Deterministic Updates:", deterministicUpdates);
+
+            // 2. Extract Info using AI (Smart)
+            const aiUpdates = await extractEligibilityInfo(userText, eligibilityState.current, lastBotQuestion);
+            console.log("AI Updates:", aiUpdates);
+
+            // 3. Merge Updates (Deterministic takes precedence for specific yes/no logic if we trust it more, or merge)
+            // Here we merge, letting deterministic override if present (since it's explicit logic), or vice versa.
+            // Let's assume deterministic is safer for simple booleans where AI might fail.
+            const updates = { ...aiUpdates, ...deterministicUpdates };
+
+            // 4. Update State
             eligibilityState.current = {
                 ...eligibilityState.current,
-                ...extractedUpdates,
+                ...updates,
             };
             console.log("Current State:", eligibilityState.current);
 
-            // 3. Determine Next Step
+            // 5. Determine Next Step
             const nextQuestion = getNextQuestion(eligibilityState.current);
 
             if (nextQuestion) {
@@ -95,13 +111,11 @@ const ChatScreen = () => {
                 setIsTyping(false);
                 addMessage(nextQuestion, 'bot');
             } else {
-                // 4. Flow Complete - Check Eligibility
+                // Flow Complete - Check Eligibility
                 addMessage("Thank you! I have all the details. Checking eligible schemes now... 🔍", 'bot');
 
-                // Fetch schemes (using our engine, which calls Supabase)
-                // Note: We need to import checkEligibility from where we defined it.
-                // Assuming we created src/ai/eligibilityEngine.ts
-                const schemes = await checkEligibility(eligibilityState.current); // Mocked for now if file not ready
+                // Fetch schemes
+                const schemes = await checkEligibility(eligibilityState.current);
 
                 // Generate explanation
                 const explanation = await generateExplanation(schemes, eligibilityState.current);
