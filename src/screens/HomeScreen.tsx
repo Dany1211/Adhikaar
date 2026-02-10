@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     },
     // Sections
     section: {
-        marginBottom: SPACING.xl,
+        marginBottom: SPACING.xs,
     },
     sectionTitle: {
         paddingHorizontal: SPACING.l,
