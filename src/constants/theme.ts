@@ -13,15 +13,15 @@ export const COLORS = {
     danger: '#EF4444', // Rose
     white: '#FFFFFF',
     black: '#000000',
-    accent: '#8B5CF6', // Violet accent
-    // Vibrant Palette for "Cool" UI
+    accent: '#0F766E', // Teal accent
+    // Vibrant Palette for "Cool" UI - RELATABLE TEAL THEME
     vibrant: {
-        primary: '#4338ca', // Indigo 700
-        secondary: '#7c3aed', // Violet 600
-        tertiary: '#db2777', // Pink 600
-        background: '#eff6ff', // Blue 50
+        primary: '#0F766E', // Teal 700 - Trustworthy, Official
+        secondary: '#14B8A6', // Teal 500 - Approachable
+        tertiary: '#F59E0B', // Amber 500 - Warmth/Highlight
+        background: '#F0FDFA', // Teal 50 - Very subtle fresh background
         cardBg: '#ffffff',
-        text: '#1e1b4b', // Indigo 950
+        text: '#134E4A', // Teal 900 - Deep & Readable
     },
     // Bento Grid Colors
     bento: {

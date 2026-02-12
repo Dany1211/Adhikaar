@@ -183,7 +183,7 @@ const ChatScreen = () => {
             return (
                 <View style={[styles.messageRow, styles.botRow, { marginBottom: SPACING.l }]}>
                     <View style={styles.botAvatar}>
-                        <MaterialCommunityIcons name="robot-outline" size={20} color={COLORS.vibrant.primary} />
+                        <MaterialCommunityIcons name="message-text" size={24} color={COLORS.vibrant.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: SPACING.m }}>
@@ -201,8 +201,8 @@ const ChatScreen = () => {
             ]}>
                 {!isUser && (
                     <View style={styles.botAvatar}>
-                        {/* More "creative" icon, maybe 'sparkles' or 'robot-happy' if available, staying with robot for now but styled */}
-                        <MaterialCommunityIcons name="robot-outline" size={20} color={COLORS.vibrant.primary} />
+                        {/* Message icon on light background */}
+                        <MaterialCommunityIcons name="message-text" size={24} color={COLORS.vibrant.primary} />
                     </View>
                 )}
                 <View style={[
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: COLORS.success, // Emerald Green
+        backgroundColor: COLORS.success, // Emerald Green - Good for status
         marginRight: 6,
         borderWidth: 1,
         borderColor: COLORS.white,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
         width: 38,
         height: 38,
         borderRadius: 14, // Softer square
-        backgroundColor: COLORS.white,
+        backgroundColor: COLORS.vibrant.background, // Match chat background (light)
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: SPACING.s,
@@ -372,6 +372,8 @@ const styles = StyleSheet.create({
         ...SHADOWS.medium, // More pop
         shadowColor: COLORS.vibrant.primary,
         shadowOpacity: 0.15,
+        borderWidth: 1,
+        borderColor: COLORS.vibrant.primary + '10',
     },
     messageBubble: {
         maxWidth: '75%',

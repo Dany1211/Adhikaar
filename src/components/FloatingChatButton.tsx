@@ -19,7 +19,8 @@ const FloatingChatButton = ({ visible, onPress }: FloatingChatButtonProps) => {
             onPress={onPress}
             activeOpacity={0.8}
         >
-            <MaterialCommunityIcons name="robot" size={32} color={COLORS.white} />
+            {/* "message-text" as requested by user */}
+            <MaterialCommunityIcons name="message-text" size={32} color={COLORS.vibrant.primary} />
         </TouchableOpacity>
     );
 };
@@ -32,12 +33,16 @@ const styles = StyleSheet.create({
         width: 64,
         height: 64,
         borderRadius: 32,
-        backgroundColor: COLORS.primary,
+        backgroundColor: COLORS.vibrant.background, // Chat page main background (light)
         justifyContent: 'center',
         alignItems: 'center',
         ...SHADOWS.medium,
+        shadowColor: COLORS.vibrant.primary, // Colored shadow for visibility
+        shadowOpacity: 0.3,
         elevation: 10,
         zIndex: 9999, // Ensure it's on top
+        borderWidth: 1,
+        borderColor: COLORS.vibrant.primary + '20', // Subtle border for contrast
     },
 });
 
