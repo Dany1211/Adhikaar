@@ -14,6 +14,15 @@ export const COLORS = {
     white: '#FFFFFF',
     black: '#000000',
     accent: '#8B5CF6', // Violet accent
+    // Vibrant Palette for "Cool" UI
+    vibrant: {
+        primary: '#4338ca', // Indigo 700
+        secondary: '#7c3aed', // Violet 600
+        tertiary: '#db2777', // Pink 600
+        background: '#eff6ff', // Blue 50
+        cardBg: '#ffffff',
+        text: '#1e1b4b', // Indigo 950
+    },
     // Bento Grid Colors
     bento: {
         yellow: '#FFD33C',
@@ -21,6 +30,8 @@ export const COLORS = {
         green: '#27AE60',
         orange: '#FF7B2C',
         purple: '#8B5CF6',
+        red: '#F43F5E',
+        cyan: '#06B6D4',
     }
 };
 
