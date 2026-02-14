@@ -32,6 +32,11 @@ export const translations = {
         applyNow: "Apply Now",
         comingSoon: "Coming Soon",
         eligibilityFeature: "Eligibility check feature is under development.",
+        // V3 Details
+        keyDetails: "Key Details",
+        department: "Department",
+        mode: "Application Mode",
+        helpline: "Helpline",
     },
     hi: {
         welcomeTitle: "अधिकार",
@@ -69,6 +74,11 @@ export const translations = {
         applyNow: "अभी आवेदन करें",
         comingSoon: "जल्द आ रहा है",
         eligibilityFeature: "पात्रता जांच सुविधा विकास अधीन है।",
+        // V3 Details
+        keyDetails: "महत्वपूर्ण विवरण",
+        department: "विभाग",
+        mode: "आवेदन का तरीका",
+        helpline: "हेल्पलाइन",
     },
     mr: {
         welcomeTitle: "अधिकार",
@@ -106,6 +116,11 @@ export const translations = {
         applyNow: "आता अर्ज करा",
         comingSoon: "लवकरच येत आहे",
         eligibilityFeature: "पात्रता तपासणी वैशिष्ट्य विकास सुरू आहे.",
+        // V3 Details
+        keyDetails: "महत्वाचे तपशील",
+        department: "विभाग",
+        mode: "अर्ज पद्धत",
+        helpline: "हेल्पलाइन",
     },
 };
 

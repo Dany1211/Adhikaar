@@ -6,32 +6,19 @@
 
 import { EligibilityState } from './eligibilityState';
 
-export const getNextQuestion = (state: EligibilityState): string | null => {
-    if (state.age === null) {
-        return 'May I know your age to check age-specific schemes?';
-    }
+export const getNextQuestion = (state: EligibilityState): keyof EligibilityState | 'done' => {
+    if (state.age === null) return 'age';
+    if (state.gender === null) return 'gender';
+    if (state.state === null) return 'state';
+    if (state.isFarmer === null && state.occupation === null) return 'occupation'; // Ask occupation first, might infer farmer
+    if (state.occupation === null) return 'occupation';
+    if (state.income === null && state.incomeRange === null) return 'income';
 
-    if (state.gender === null) {
-        return 'What is your gender? (Male / Female / Other)';
-    }
+    // Optional / Advanced fields
+    if (state.caste === null) return 'caste';
+    if (state.maritalStatus === null) return 'maritalStatus';
 
-    if (state.state === null) {
-        return 'Which state do you currently reside in?';
-    }
-
-    if (state.isFarmer === null) {
-        return 'Are you a farmer by profession? (Yes / No)';
-    }
-
-    if (state.occupation === null) {
-        return 'What is your primary occupation? (e.g., Student, Private Job, Daily Wage Worker)';
-    }
-
-    if (state.incomeRange === null) {
-        return 'What is your annual family income range? (Below 1L, 1–3L, 3–5L, Above 5L)';
-    }
-
-    return null;
+    return 'done';
 };
 
 export const inferFieldFromQuestion = (
