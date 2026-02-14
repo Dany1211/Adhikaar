@@ -1,10 +1,12 @@
 PROJECT: ADHIKAAR
 PURPOSE: Canonical data schemas for offline-first + Supabase-backed app
-NOTE:
-- All schemas are language-agnostic
-- English is the canonical language for stored text
+
+PRINCIPLES:
+- English is canonical storage language
 - Translations happen at UI / AI layer
-- AI NEVER writes raw text into these schemas
+- AI NEVER mutates authoritative data
+- Eligibility is deterministic and auditable
+- Supabase is a sync target, not runtime dependency
 --------------------------------------------------
 
 
@@ -12,60 +14,126 @@ NOTE:
 SCHEMA: schemes
 ==============================
 Purpose:
-- Master list of government schemes
+- Master registry of all government schemes
 - Read-only for users
-- Source of truth for discovery & eligibility
+- Source of truth for discovery & eligibility mapping
 
 Fields:
 - id (uuid, primary key)
-- name (text)                       // canonical English name
-- short_description (text)
+- name (text, not null)
+- short_description (text, not null)
 - long_description (text)
-- state_type (enum)                 // 'central' | 'state'
-- applicable_states (text[])        // NULL = all states
-- categories (text[])               // e.g. ['farmer','women']
-- benefits (text)
+- state_type (enum: 'central' | 'state')
+- implementing_department (text, nullable)
 - official_link (text)
-- is_active (boolean)
+- helpline_number (text)
+- application_mode (enum: 'online' | 'offline' | 'both')
+- benefits (text)
+- is_active (boolean, default true)
+- priority_rank (int, default 0)          // For featured ordering
 - last_updated (date)
 - created_at (timestamp)
 
-Offline notes:
-- Cached locally for offline browsing
-- Updated when network is available
+Notes:
+- NO eligibility logic here
+- NO rule logic here
+- Pure informational layer
 
 
 ==============================
 SCHEMA: scheme_eligibility_rules
 ==============================
 Purpose:
-- Deterministic eligibility rules
-- AI does NOT decide eligibility
-- App evaluates rules locally
+- Deterministic rule engine
+- Fully offline evaluable
+- One-to-many with schemes
+- AI NEVER evaluates rules
 
 Fields:
 - id (uuid, primary key)
 - scheme_id (uuid, FK -> schemes.id)
+
+------------------------------
+Demographic Rules
+------------------------------
 - min_age (int, nullable)
 - max_age (int, nullable)
+- allowed_genders (text[], nullable)      // ['male','female','other']
+- allowed_categories (text[], nullable)   // ['sc','st','obc','general','ews']
+
+------------------------------
+Income Rules
+------------------------------
+- income_min (numeric, nullable)
 - income_max (numeric, nullable)
-- occupation (text[])               // ['farmer','student']
-- category (text[])                 // ['sc','st','obc','general']
-- requires_land_ownership (boolean)
-- requires_disability (boolean)
+- income_type (enum: 'individual' | 'family', nullable)
+
+------------------------------
+Occupation Rules
+------------------------------
+- allowed_occupations (text[], nullable)
+- employment_status (text[], nullable)    // ['employed','unemployed','student']
+
+------------------------------
+Agriculture Rules
+------------------------------
+- requires_farmer (boolean, nullable)
+- min_land_size (numeric, nullable)
+- max_land_size (numeric, nullable)
+
+------------------------------
+Social Conditions
+------------------------------
+- requires_disability (boolean, nullable)
+- widow_only (boolean, nullable)
+- student_only (boolean, nullable)
+- minority_only (boolean, nullable)
+- bpl_only (boolean, nullable)
+
+------------------------------
+Geographic Overrides
+------------------------------
+- applicable_states (text[], nullable)     // Overrides scheme-level
+- excluded_states (text[], nullable)
+
+------------------------------
+Administrative
+------------------------------
+- is_active (boolean, default true)
 - created_at (timestamp)
 
-Offline notes:
-- Rules are downloaded with schemes
-- Evaluated fully offline
+Notes:
+- Multiple rule rows per scheme allowed
+- All rules must be AND-evaluated within row
+- Different rows may represent OR scenarios
+
+
+==============================
+SCHEMA: scheme_required_documents
+==============================
+Purpose:
+- Document requirements per scheme
+- Fully deterministic
+- Offline reference
+
+Fields:
+- id (uuid, primary key)
+- scheme_id (uuid, FK -> schemes.id)
+- document_name (text)
+- is_mandatory (boolean, default true)
+- created_at (timestamp)
+
+Notes:
+- Avoid separate documents table unless reuse needed
+- Keep simple unless scaling nationally
 
 
 ==============================
 SCHEMA: users
 ==============================
 Purpose:
-- Soft identity (optional)
-- No authentication required initially
+- Optional soft identity
+- Works without authentication
 
 Fields:
 - id (uuid, primary key)
@@ -73,9 +141,9 @@ Fields:
 - name (text, nullable)
 - created_at (timestamp)
 
-Offline notes:
-- Local UUID used until auth is added
-- Phone may be added later for sync
+Notes:
+- Local UUID generated offline
+- Supabase sync optional
 
 
 ==============================
@@ -83,45 +151,70 @@ SCHEMA: user_profiles
 ==============================
 Purpose:
 - Structured eligibility data
-- Filled via conversational UI / AI
-- NEVER via visible forms
+- Filled via conversational AI
+- NEVER visible form-based
 
 Fields:
 - id (uuid, primary key)
 - user_id (uuid, FK -> users.id)
+
+------------------------------
+Core Eligibility Data
+------------------------------
 - age (int, nullable)
+- gender (text, nullable)
 - state (text, nullable)
 - income (numeric, nullable)
+- income_type (enum: 'individual' | 'family', nullable)
 - occupation (text, nullable)
+- employment_status (text, nullable)
 - category (text, nullable)
+
+------------------------------
+Agriculture Data
+------------------------------
+- is_farmer (boolean, nullable)
+- land_size (numeric, nullable)
+
+------------------------------
+Social Data
+------------------------------
 - has_disability (boolean, nullable)
-- owns_land (boolean, nullable)
+- is_widow (boolean, nullable)
+- is_student (boolean, nullable)
+- is_minority (boolean, nullable)
+- is_bpl (boolean, nullable)
+
+------------------------------
+Metadata
+------------------------------
 - updated_at (timestamp)
 
-Offline notes:
-- Stored locally first
-- Synced later if auth exists
+Notes:
+- Fully offline usable
+- Synced only if auth added
+- Single source of truth per user
 
 
 ==============================
 SCHEMA: applications
 ==============================
 Purpose:
-- Track schemes user is interested in / applied for
-- Core retention feature
+- Tracks scheme engagement
+- Retention mechanism
 
 Fields:
 - id (uuid, primary key)
 - user_id (uuid, FK -> users.id)
 - scheme_id (uuid, FK -> schemes.id)
-- status (enum)                     // 'saved' | 'applied' | 'pending' | 'approved' | 'rejected'
+- status (enum: 'saved' | 'applied' | 'pending' | 'approved' | 'rejected')
 - applied_on (date, nullable)
 - notes (text, nullable)
 - created_at (timestamp)
 
-Offline notes:
-- Fully usable offline
-- Sync status later if needed
+Notes:
+- Works offline
+- Sync later
 
 
 ==============================
@@ -129,52 +222,51 @@ SCHEMA: scheme_categories
 ==============================
 Purpose:
 - Canonical category registry
-- Prevents hardcoded strings everywhere
+- Prevents string duplication
 
 Fields:
-- id (text, primary key)             // 'farmer','student'
-- label (text)                       // 'Farmers'
+- id (text, primary key)
+- label (text)
+- icon_name (text, nullable)
 - created_at (timestamp)
 
-Offline notes:
-- Small table
+Notes:
+- Small static table
 - Cached permanently
 
 
 ==============================
 OFFLINE-FIRST RULES
 ==============================
-1. App must work fully without network
-2. Supabase is a sync target, not a dependency
-3. All reads must have a local fallback
-4. AI operates ONLY on:
-   - user input
-   - schema definitions
-5. AI NEVER mutates authoritative data
-6. Eligibility is deterministic, explainable, auditable
+1. App must function fully without internet.
+2. Supabase is synchronization layer only.
+3. All reads must have local fallback.
+4. All eligibility evaluation must run locally.
+5. Rule evaluation must be explainable and auditable.
+6. No hidden logic in AI.
 
 
 ==============================
 LANGUAGE RULES
 ==============================
-- DB stores canonical English
-- UI language is user-selected
-- AI translates at presentation layer
-- Structured fields are language-neutral
+- DB stores canonical English.
+- UI language selected by user.
+- AI translates only at presentation layer.
+- Structured fields remain language-neutral.
 
 
 ==============================
 AI ROLE (STRICT)
 ==============================
-AI is allowed to:
-- extract structured fields from free text
-- explain eligibility decisions
-- translate scheme descriptions for display
+AI IS ALLOWED TO:
+- Extract structured fields from free text
+- Translate scheme descriptions
+- Explain eligibility reasoning
 
-AI is NOT allowed to:
-- decide eligibility
-- modify scheme data
-- invent schemes
-- bypass rules
+AI IS NOT ALLOWED TO:
+- Decide eligibility
+- Modify scheme data
+- Invent schemes
+- Override deterministic rules
 --------------------------------------------------
 END OF FILE
