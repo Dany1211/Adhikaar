@@ -25,7 +25,7 @@ import { useLanguage } from '../context/LanguageContext';
 // AI Modules
 import { initialEligibilityState, EligibilityState } from '../ai/eligibilityState';
 import { getNextQuestion, inferFieldFromQuestion, detectDeterministicUpdate } from '../ai/conversationController';
-import { extractEligibilityInfo, generateExplanation } from '../ai/openRouterExtractor';
+import { extractEligibilityInfo, generateExplanation, generateConversationalResponse } from '../ai/openRouterExtractor';
 import { checkEligibility } from '../ai/eligibilityEngine'; // Placeholder import if not ready yet
 import { Scheme } from '../services/api';
 
@@ -116,15 +116,25 @@ const ChatScreen = () => {
             console.log("Current State:", eligibilityState.current);
 
             // 5. Determine Next Step
-            const nextQuestion = getNextQuestion(eligibilityState.current);
+            const nextStep = getNextQuestion(eligibilityState.current);
 
-            if (nextQuestion) {
-                // Ask next question
+            if (nextStep !== 'done') {
+                // Ask next question dynamically
+                const aiQuestion = await generateConversationalResponse(
+                    eligibilityState.current,
+                    nextStep as keyof EligibilityState,
+                    userText
+                );
                 setIsTyping(false);
-                addMessage(nextQuestion, 'bot');
+                addMessage(aiQuestion, 'bot');
             } else {
                 // Flow Complete - Check Eligibility
-                addMessage("Thank you! I have all the details. Checking eligible schemes now... 🔍", 'bot');
+                const closingRemark = await generateConversationalResponse(
+                    eligibilityState.current,
+                    'done',
+                    userText
+                );
+                addMessage(closingRemark, 'bot'); // "Thanks, checking schemes..."
 
                 // Fetch schemes
                 const schemes = await checkEligibility(eligibilityState.current);

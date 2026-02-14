@@ -140,6 +140,38 @@ const SchemeDetailsScreen = ({ route, navigation }: Props) => {
                         </View>
                     )}
 
+                    {/* V3 Details Card */}
+                    {(scheme.implementing_department || scheme.helpline_number || scheme.application_mode) && (
+                        <View style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <View style={styles.iconContainer}>
+                                    <MaterialCommunityIcons name="information-variant" size={20} color={COLORS.primary} />
+                                </View>
+                                <Text style={styles.cardTitle}>{t('keyDetails')}</Text>
+                            </View>
+                            <View style={styles.cardContent}>
+                                {scheme.implementing_department && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>{t('department')}:</Text>
+                                        <Text style={styles.detailValue}>{scheme.implementing_department}</Text>
+                                    </View>
+                                )}
+                                {scheme.application_mode && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>{t('mode')}:</Text>
+                                        <Text style={[styles.detailValue, { textTransform: 'capitalize' }]}>{scheme.application_mode}</Text>
+                                    </View>
+                                )}
+                                {scheme.helpline_number && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>{t('helpline')}:</Text>
+                                        <Text style={styles.detailValue}>{scheme.helpline_number}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
+
                     {/* Documents Card */}
                     {renderSectionCard(
                         t('documentsRequired'),
@@ -441,6 +473,22 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontWeight: '700',
         fontSize: FONT_SIZE.m,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        marginBottom: 8,
+    },
+    detailLabel: {
+        fontSize: FONT_SIZE.m,
+        fontWeight: '600',
+        color: COLORS.secondary,
+        width: 120,
+    },
+    detailValue: {
+        fontSize: FONT_SIZE.m,
+        color: COLORS.text,
+        flex: 1,
+        fontWeight: '500',
     },
 });
 
